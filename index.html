@@ -10,49 +10,58 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js" defer></script>
+  <link rel="stylesheet" href="style.css?v=kampus-biru-1">
+  <script src="script.js?v=kampus-biru-1" defer></script>
 </head>
 <body>
   <div class="site">
     <header class="site-header">
-      <div class="wordmark">
+      <a class="wordmark" href="#beranda">
         <span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v11h-8l-4 4v-4H4zM8 9h8m-8 3h5"/></svg></span>
         <span>DemokrasiDigital</span>
-      </div>
+      </a>
       <span class="eyebrow header-meta">Modul interaktif / PKN</span>
     </header>
+    <nav class="dashboard-nav" aria-label="Pilih halaman dashboard">
+      <a href="#beranda" aria-current="page">Beranda</a>
+      <a href="#tentang">Tentang</a>
+      <a href="#kronologi">Kronologi</a>
+      <a href="#literasi">Literasi</a>
+      <a href="#partisipasi">Partisipasi</a>
+      <a href="#kuis">Kuis</a>
+      <a href="#diskusi">Diskusi</a>
+    </nav>
 
     <noscript><p class="notice">Aktifkan JavaScript di browser untuk membuka materi dan mengerjakan kuis.</p></noscript>
 
     <main id="materi" class="stage">
-      <section class="frame home-grid" data-frame="Beranda" aria-labelledby="home-title">
-        <div class="home-copy">
-          <p class="eyebrow">Edisi 01 / Demokrasi digital</p>
-          <h1 id="home-title" tabindex="-1">Peringatan<br>Darurat 2024</h1>
-          <p class="lead">Telusuri bagaimana Garuda Biru menyebar, pahami konteks Pilkada, lalu uji cara kamu menyaring informasi.</p>
-          <button id="start" class="button home-action" type="button" disabled>Jelajahi materi <span aria-hidden="true">→</span></button>
-        </div>
-        <div class="archive-plate">
-          <div class="archive-stamp"><span>Arsip peristiwa</span><span>20–22 AGT</span></div>
-          <svg viewBox="0 0 520 460" preserveAspectRatio="xMidYMid slice" aria-hidden="true" fill="none">
-            <g transform="translate(316 200)">
-              <circle r="136" stroke="#d7e2ff" opacity=".5"/><circle r="108" stroke="#d7e2ff" opacity=".48"/><circle r="80" stroke="#d7e2ff" opacity=".44"/><circle r="52" stroke="#d7e2ff" opacity=".35"/>
-              <path d="M-171 0H171M0-156V156M-116-116L116 116m0-232L-116 116" stroke="#d7e2ff" opacity=".36" stroke-dasharray="2 6"/>
-              <path d="M-164 1h105l30-29 35 55 22-27h126" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="-104" cy="1" r="6" fill="#e5f58e"/><circle cx="108" cy="0" r="6" fill="#e5f58e"/><circle cy="-136" r="5" fill="#e5f58e"/>
-              <path d="M-104 1v-76h-49M108 0v81h34" stroke="#e5f58e" opacity=".8"/>
-              <text x="-158" y="-84" fill="white" font-weight="700" font-size="12">PUTUSAN MK</text>
-              <text x="63" y="102" fill="white" font-weight="700" font-size="12">RUANG PUBLIK</text>
-            </g>
-          </svg>
-          <div class="archive-title"><strong>2024</strong><span>Dari linimasa ke ruang publik.</span></div>
-        </div>
-      </section>
+      <section class="frame campus-home" data-frame="Beranda" aria-labelledby="home-title">
+  <div class="masthead">
+    <div class="mast-copy">
+      <p class="mast-label">Belajar dari Peringatan Darurat 2024</p>
+      <h1 id="home-title" tabindex="-1">Baca konteks.<br><span>Suarakan pendapat.</span></h1>
+      <p>Telusuri bagaimana Garuda Biru menyebar, cek klaim yang viral, dan diskusikan apa yang bisa dilakukan mahasiswa.</p>
+      <div class="mast-actions">
+        <button id="start" class="button" type="button" disabled>Mulai belajar</button>
+        <a class="button secondary" href="#diskusi">Ruang diskusi</a>
+      </div>
+    </div>
+  </div>
+  <div class="directory">
+    <h2>Pilih halaman</h2>
+    <div class="portal-grid">
+      <a class="portal" href="#kronologi"><span class="portal-type">Kronologi</span><strong>Tiga hari di Agustus 2024</strong><p>Putusan MK, Garuda Biru, dan respons publik.</p></a>
+      <a class="portal" href="#literasi"><span class="portal-type">Literasi</span><strong>Cek sebelum bagikan</strong><p>Latihan membaca sumber, tanggal, dan konteks.</p></a>
+      <a class="portal" href="#partisipasi"><span class="portal-type">Partisipasi</span><strong>Bersuara dengan rujukan</strong><p>Cara berdiskusi dan mengoreksi informasi.</p></a>
+      <a class="portal" href="#kuis"><span class="portal-type">Kuis</span><strong>Uji pemahamanmu</strong><p>Lima soal dengan pembahasan dan lencana.</p></a>
+      <a class="portal" href="#diskusi"><span class="portal-type">Diskusi</span><strong>Tukar sudut pandang</strong><p>Pilih topik dan tulis tanggapanmu.</p></a>
+    </div>
+  </div>
+</section>
 
       <section class="frame split" data-frame="Tentang" aria-labelledby="about-title" hidden>
         <div>
-          <p class="eyebrow">01 / Tentang proyek</p>
+          <p class="eyebrow">Tentang proyek</p>
           <h2 id="about-title" tabindex="-1">Setelah lihat unggahan viral, apa langkahmu?</h2>
           <p class="lead">DemokrasiDigital adalah proyek PKN untuk mahasiswa. Kita pakai satu kasus nyata untuk berlatih memahami isu, memeriksa informasi, dan menyampaikan pendapat.</p>
         </div>
@@ -69,7 +78,7 @@
 
       <section class="frame split" data-frame="Kronologi" aria-labelledby="timeline-title" hidden>
         <div>
-          <p class="eyebrow">02 / Kronologi</p>
+          <p class="eyebrow">Kronologi</p>
           <h2 id="timeline-title" tabindex="-1">Tiga hari di Agustus 2024.</h2>
           <p class="lead">Gambar Garuda berlatar biru beredar sebagai simbol seruan warga untuk mengawal perubahan aturan Pilkada. Gambar itu berasal dari cuplikan video fiksi.</p>
           <a class="source" href="https://amp.kompas.com/tren/read/2024/08/22/163000065/asal-usul-peringatan-darurat-indonesia-garuda-biru-viral-di-medsos" target="_blank" rel="noopener noreferrer">Asal gambar · Kompas.com <span aria-hidden="true">↗</span><span class="sr-only"> (tab baru)</span></a>
@@ -97,7 +106,7 @@
 
       <section class="frame split" data-frame="Literasi" aria-labelledby="literacy-title" hidden>
         <div>
-          <p class="eyebrow">03 / Literasi informasi</p>
+          <p class="eyebrow">Literasi informasi</p>
           <h2 id="literacy-title" tabindex="-1">Cek dulu sebelum bagikan.</h2>
           <div class="scenario">
             <p class="eyebrow">Simulasi / Grup kampus</p>
@@ -118,7 +127,7 @@
 
       <section class="frame split" data-frame="Partisipasi" aria-labelledby="participation-title" hidden>
         <div>
-          <p class="eyebrow">04 / Panduan partisipasi</p>
+          <p class="eyebrow">Panduan partisipasi</p>
           <h2 id="participation-title" tabindex="-1">Bersuara dengan tanggung jawab.</h2>
           <p class="lead">Kamu bisa mulai dari grup kampus atau ruang diskusi yang sudah kamu ikuti. Pilih tindakan yang membantu orang lain memahami isu.</p>
         </div>
@@ -158,7 +167,7 @@
 
       <section class="frame split result-grid" data-frame="Hasil" aria-labelledby="result-title" hidden>
         <div>
-          <p class="eyebrow">06 / Hasil kuis</p>
+          <p class="eyebrow">Hasil kuis</p>
           <h2 id="result-title" tabindex="-1">Kuis selesai.</h2>
           <div class="score-row"><strong id="score"></strong><span>jawaban benar</span></div>
           <p id="result-message" class="lead"></p>
@@ -187,20 +196,58 @@
             </form>
             <p id="recap-status" class="status" role="status"></p>
             <div class="form-followup">
-              <a class="source" href="https://docs.google.com/forms/d/e/1FAIpQLScVH1P7XtVeRiEWUePGxS_qFlMStWGBuGWXT3G7IVI-ou2N1Q/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">Kuis lanjutan di Google Form (10 soal) <span aria-hidden="true">↗</span><span class="sr-only"> (tab baru)</span></a>
+              <a class="source" href="https://docs.google.com/forms/d/e/1FAIpQLScVH1P7XtVeRiEWUePGxS_qFlMStWGBuGWXT3G7IVI-ou2N1Q/viewform?usp=dialog" target="_blank" rel="noopener noreferrer">Kuis lanjutan di Google Form (10 soal)<span class="sr-only"> (tab baru)</span></a>
             </div>
           </div>
         </div>
       </section>
+<section class="frame forum" data-frame="Diskusi" aria-labelledby="forum-title" hidden>
+  <header class="forum-title">
+    <h2 id="forum-title" tabindex="-1">Ruang diskusi</h2>
+    <p>Bahas ide, sertakan sumber, dan hormati privasi orang lain.</p>
+  </header>
+  <div class="forum-grid">
+    <section class="topic-panel" aria-labelledby="topics-title">
+      <div class="topic-heading"><h3 id="topics-title">Pilih topik</h3><button id="refresh-discussion" class="button secondary" type="button">Muat ulang</button></div>
+      <div id="topic-list" class="topic-list" role="group" aria-label="Pilih topik"></div>
+    </section>
+    <section class="conversation" aria-labelledby="thread-title">
+      <header class="thread-header">
+        <p id="thread-category" class="eyebrow"></p>
+        <h3 id="thread-title"></h3>
+      </header>
+      <div id="thread-replies" class="thread-replies" aria-live="polite"></div>
+      <form id="reply-form">
+        <fieldset class="modes">
+          <legend>Tampil sebagai</legend>
+          <label><input type="radio" name="mode" value="anonymous" checked> Anonim</label>
+          <label><input type="radio" name="mode" value="named"> Nama tampil</label>
+        </fieldset>
+        <p id="identity-hint" class="field-hint">Balasan tampil sebagai “Anonim”.</p>
+        <div id="display-name-field" hidden>
+          <label for="display-name">Nama tampil</label>
+          <input id="display-name" type="text" maxlength="40" autocomplete="off">
+        </div>
+        <label for="reply">Tanggapan</label>
+        <textarea id="reply" required maxlength="600" rows="3" placeholder="Tulis pendapatmu dan alasan di baliknya…"></textarea>
+        <div class="reply-actions">
+          <p>Tanggapan bisa dibaca publik. Pilihan anonim menyembunyikan nama dari pembaca.</p>
+          <button class="button" type="submit" disabled>Kirim tanggapan</button>
+        </div>
+        <p id="reply-status" class="status" role="status"></p>
+      </form>
+    </section>
+  </div>
+</section>
     </main>
 
     <footer class="site-footer">
-      <p class="frame-marker"><strong id="frame-number">01 / 07</strong> <span id="frame-label">Beranda</span></p>
+      <p class="frame-marker"><span id="frame-label">Beranda</span></p>
       <nav id="navigation" aria-label="Navigasi materi" hidden>
-        <button id="previous-frame" class="button secondary" type="button"><span aria-hidden="true">←</span> Kembali</button>
-        <button id="next-frame" class="button" type="button"><span id="next-frame-label"></span> <span aria-hidden="true">→</span></button>
+        <button id="previous-frame" class="button secondary" type="button">Kembali</button>
+        <button id="next-frame" class="button" type="button"><span id="next-frame-label"></span></button>
       </nav>
-      <p id="home-footer">Kronologi <span aria-hidden="true">·</span> Literasi <span aria-hidden="true">·</span> Kuis</p>
+      <p id="home-footer">Proyek PKN untuk mahasiswa</p>
     </footer>
   </div>
 </body>

@@ -89,14 +89,12 @@ let currentFrame = 0;
 let currentQuestion = 0;
 let recapAttemptId = null;
 
-function showFrame(index) {
+function showFrame(index, focus = true) {
   frames[currentFrame].hidden = true;
   currentFrame = index;
   const frame = frames[index];
   frame.hidden = false;
 
-  const chapter = String(index + 1).padStart(2, "0");
-  byId("frame-number").textContent = chapter + " / " + String(frames.length).padStart(2, "0");
   byId("frame-label").textContent = frame.dataset.frame;
   byId("home-footer").hidden = index !== 0;
   navigation.hidden = index === 0;
@@ -107,7 +105,9 @@ function showFrame(index) {
     ][index];
   }
 
-  frame.querySelector("h1, h2").focus({ preventScroll: true });
+  syncRoute(frame.dataset.frame);
+  if (focus) frame.querySelector("h1, h2").focus({ preventScroll: true });
+  if (frame.dataset.frame === "Diskusi") loadDiscussion();
   window.scrollTo(0, 0);
 }
 
@@ -131,7 +131,7 @@ function showFeedback(question, answer) {
 function renderQuestion() {
   const question = questions[currentQuestion];
   const previousAnswer = answers[currentQuestion];
-  byId("question-count").textContent = "05 / Kuis · Soal " + (currentQuestion + 1) + " dari " + questions.length;
+  byId("question-count").textContent = "Soal " + (currentQuestion + 1) + " dari " + questions.length;
   questionTitle.textContent = question.prompt;
   byId("quiz-progress").max = questions.length;
   byId("quiz-progress").value = answers.length;
@@ -199,7 +199,7 @@ function downloadBadge() {
 const start = byId("start");
 start.addEventListener("click", () => showFrame(1));
 start.disabled = false;
-byId("previous-frame").addEventListener("click", () => showFrame(currentFrame - 1));
+byId("previous-frame").addEventListener("click", () => showFrame(currentFrame === frames.length - 1 ? 0 : currentFrame - 1));
 nextFrame.addEventListener("click", () => showFrame(currentFrame + 1));
 
 quizForm.addEventListener("submit", (event) => {
@@ -269,4 +269,229 @@ recapForm.addEventListener("submit", async (event) => {
   }
 });
 
+
+const routes = ["beranda", "tentang", "kronologi", "literasi", "partisipasi", "kuis", "hasil", "diskusi"];
+const navLinks = Array.from(document.querySelectorAll(".dashboard-nav a"));
+
+function syncRoute(frameName) {
+  const route = frameName.toLowerCase();
+  const active = route === "hasil" ? "kuis" : route;
+  document.body.dataset.page = route;
+  navLinks.forEach((link) => {
+    if (link.hash === "#" + active) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+  if (location.hash !== "#" + route) history.pushState(null, "", "#" + route);
+}
+
+function restoreRoute() {
+  const index = routes.indexOf(location.hash.slice(1));
+  const validIndex = index === resultIndex && answers.length !== questions.length ? quizIndex : Math.max(0, index);
+  if (location.hash !== "#" + routes[validIndex]) history.replaceState(null, "", "#" + routes[validIndex]);
+  if (validIndex !== currentFrame) showFrame(validIndex);
+  else syncRoute(frames[currentFrame].dataset.frame);
+}
+
+window.addEventListener("hashchange", restoreRoute);
+window.addEventListener("popstate", restoreRoute);
+
+
+const discussionTopics = [
+  { id: "literasi", category: "Literasi informasi", title: "Kalau unggahan muncul di banyak akun, apa yang masih perlu dicek?" },
+  { id: "kronologi", category: "Kronologi", title: "Bagian mana dari kronologi Agustus 2024 yang masih bikin kamu bingung?" },
+  { id: "partisipasi", category: "Partisipasi", title: "Gimana caramu mengoreksi info keliru di grup kampus?" }
+];
+const discussionForm = byId("reply-form");
+const discussionStatus = byId("reply-status");
+const discussionName = byId("display-name");
+const discussionMessage = byId("reply");
+const discussionList = byId("thread-replies");
+const discussionTopicsList = byId("topic-list");
+const discussionSend = discussionForm.querySelector('button[type="submit"]');
+const discussionRefresh = byId("refresh-discussion");
+const discussionSessionKey = "demokrasidigital.diskusi.session.v1";
+const discussionDate = new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" });
+let selectedTopic = discussionTopics[0];
+let discussionRows = null;
+let discussionLoading = false;
+let discussionSending = false;
+let discussionLoadFailed = false;
+let discussionSession;
+let pendingReply;
+
+async function discussionRequest(path, body, token) {
+  const headers = { apikey: publishableKey };
+  if (token) headers.Authorization = "Bearer " + token;
+  if (body) headers["Content-Type"] = "application/json";
+  const response = await fetch(supabaseUrl + path, {
+    method: body ? "POST" : "GET",
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+    cache: "no-store",
+    signal: AbortSignal.timeout(12000)
+  });
+  if (!response.ok) {
+    const error = new Error("Permintaan diskusi gagal");
+    error.status = response.status;
+    throw error;
+  }
+  if (response.status !== 204) {
+    const payload = await response.text();
+    return payload ? JSON.parse(payload) : null;
+  }
+}
+
+async function getDiscussionToken() {
+  const renew = async () => {
+    try {
+      discussionSession = JSON.parse(localStorage.getItem(discussionSessionKey)) || discussionSession;
+    } catch { /* Private browsing may prevent access to storage. */ }
+    if (discussionSession?.expiresAt > Date.now() + 60000) return discussionSession.accessToken;
+    let session;
+    if (discussionSession?.refreshToken) {
+      try {
+        session = await discussionRequest("/auth/v1/token?grant_type=refresh_token", { refresh_token: discussionSession.refreshToken });
+      } catch (error) {
+        if (![400, 401, 403].includes(error.status)) throw error;
+      }
+    }
+    session ??= await discussionRequest("/auth/v1/signup", { data: {} });
+    discussionSession = {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      expiresAt: Date.now() + session.expires_in * 1000
+    };
+    try { localStorage.setItem(discussionSessionKey, JSON.stringify(discussionSession)); }
+    catch { /* Keep the session in memory if storage is unavailable. */ }
+    return discussionSession.accessToken;
+  };
+  return navigator.locks ? navigator.locks.request(discussionSessionKey, renew) : renew();
+}
+
+function renderDiscussion() {
+  byId("thread-category").textContent = selectedTopic.category;
+  byId("thread-title").textContent = selectedTopic.title;
+  const replies = (discussionRows ?? []).filter((post) => post.topic === selectedTopic.id);
+  discussionList.replaceChildren();
+  if (discussionLoadFailed || !replies.length) {
+    const notice = document.createElement("p");
+    notice.className = "thread-empty";
+    notice.textContent = discussionLoadFailed ? "Tanggapan belum bisa dimuat. Coba muat ulang."
+      : discussionLoading ? "Memuat tanggapan…" : "Belum ada tanggapan. Mulai dari pengalamanmu sendiri.";
+    discussionList.append(notice);
+  }
+  for (const entry of replies) {
+    const post = document.createElement("article");
+    post.className = "reply-card";
+    const name = document.createElement("strong");
+    name.textContent = entry.display_name ?? "Anonim";
+    const date = document.createElement("time");
+    date.className = "reply-label";
+    date.dateTime = entry.created_at;
+    date.textContent = discussionDate.format(new Date(entry.created_at));
+    const message = document.createElement("p");
+    message.textContent = entry.message;
+    post.append(name, date, message);
+    discussionList.append(post);
+  }
+  Array.from(discussionTopicsList.children).forEach((choice, index) => {
+    const topic = discussionTopics[index];
+    choice.setAttribute("aria-pressed", String(topic === selectedTopic));
+    const total = discussionRows?.find((post) => post.topic === topic.id)?.total ?? 0;
+    choice.querySelector(".topic-count").textContent = discussionRows ? total + " tanggapan" : "";
+    choice.disabled = discussionSending;
+  });
+  discussionSend.disabled = discussionSending || discussionRows === null;
+}
+
+async function loadDiscussion() {
+  if (discussionLoading) return;
+  discussionLoading = true;
+  discussionLoadFailed = false;
+  discussionRefresh.disabled = true;
+  renderDiscussion();
+  try {
+    discussionRows = await discussionRequest("/rest/v1/rpc/dd_discussion_list");
+  } catch {
+    discussionLoadFailed = true;
+  } finally {
+    discussionLoading = false;
+    discussionRefresh.disabled = false;
+    renderDiscussion();
+  }
+}
+
+for (const topic of discussionTopics) {
+  const choice = document.createElement("button");
+  choice.type = "button";
+  choice.className = "topic-choice";
+  const category = document.createElement("span");
+  category.className = "topic-category";
+  category.textContent = topic.category;
+  const title = document.createElement("strong");
+  title.textContent = topic.title;
+  const count = document.createElement("span");
+  count.className = "topic-count";
+  choice.append(category, title, count);
+  choice.addEventListener("click", () => {
+    selectedTopic = topic;
+    discussionStatus.textContent = "";
+    renderDiscussion();
+  });
+  discussionTopicsList.append(choice);
+}
+
+function updateDiscussionIdentity() {
+  const named = discussionForm.elements.mode.value === "named";
+  byId("display-name-field").hidden = !named;
+  discussionName.required = named;
+  byId("identity-hint").textContent = named
+    ? "Nama pilihanmu akan terlihat bersama tanggapan."
+    : "Tanggapanmu akan tampil sebagai “Anonim”.";
+}
+
+discussionForm.querySelectorAll('[name="mode"]').forEach((mode) => mode.addEventListener("change", updateDiscussionIdentity));
+discussionRefresh.addEventListener("click", loadDiscussion);
+discussionForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (discussionSending) return;
+  const named = discussionForm.elements.mode.value === "named";
+  const name = named ? discussionName.value.trim() : null;
+  const message = discussionMessage.value.trim();
+  if ((named && !name) || !message) {
+    discussionStatus.textContent = "Isi nama tampil dan tanggapan sesuai mode yang dipilih.";
+    (named && !name ? discussionName : discussionMessage).focus();
+    return;
+  }
+  const draft = { p_topic: selectedTopic.id, p_display_name: name, p_message: message };
+  const signature = JSON.stringify(draft);
+  if (pendingReply?.signature !== signature) pendingReply = { signature, id: crypto.randomUUID() };
+  discussionSending = true;
+  discussionForm.querySelector("fieldset").disabled = true;
+  discussionName.readOnly = true;
+  discussionMessage.readOnly = true;
+  discussionStatus.textContent = "Mengirim tanggapan…";
+  renderDiscussion();
+  try {
+    const token = await getDiscussionToken();
+    await discussionRequest("/rest/v1/rpc/dd_discussion_submit", { ...draft, p_reply_id: pendingReply.id }, token);
+    pendingReply = undefined;
+    discussionMessage.value = "";
+    discussionStatus.textContent = "Tanggapanmu sudah tersimpan.";
+    await loadDiscussion();
+  } catch (error) {
+    discussionStatus.textContent = error.status === 429 ? "Terlalu banyak pengiriman. Coba lagi sebentar."
+      : "Pengiriman belum terkonfirmasi. Coba kirim lagi.";
+  } finally {
+    discussionSending = false;
+    discussionForm.querySelector("fieldset").disabled = false;
+    discussionName.readOnly = false;
+    discussionMessage.readOnly = false;
+    renderDiscussion();
+  }
+});
+
+updateDiscussionIdentity();
+renderDiscussion();
 renderQuestion();
+restoreRoute();
